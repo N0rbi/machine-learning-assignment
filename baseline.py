@@ -43,7 +43,7 @@ class Encode:
                 ("photo_std", pp.StandardScaler(), [15])
             ]
         if not self.use_onehots:
-            self.__transformers = list(filter(lambda transform: "onehot" not in transform[0], transfromers))
+            self.__transformers = list(filter(lambda transform: "onehot" not in transform[0], self.__transformers))
 
     def get_column_transformer(self):
         return ColumnTransformer(self.__transformers)
