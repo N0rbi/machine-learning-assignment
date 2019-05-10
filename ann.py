@@ -2,6 +2,11 @@ import numpy as np
 import pandas as pd
 import sklearn.preprocessing as pp
 from sklearn.compose import ColumnTransformer
+from sklearn.model_selection import cross_val_score, train_test_split
+from keras.wrappers.scikit_learn import KerasClassifier
+from sklearn.model_selection import GridSearchCV
+
+
 class Encode:
 
     def __init__(self, dim_red_health, use_onehots):
@@ -86,8 +91,8 @@ ct = Encode(dim_red_health, True).get_column_transformer()
 train_X = ct.fit_transform(train_X)
 
 train_y = reduced_df[["AdoptionSpeed"]].values
-y_encoder = pp.OneHotEncoder(handle_unknown="ignore")
-train_y = y_encoder.fit_transform(train_y).toarray()
+# y_encoder = pp.OneHotEncoder(handle_unknown="ignore")
+# train_y = y_encoder.fit_transform(train_y).toarray()
 
 
 from keras.models import Sequential
@@ -123,21 +128,38 @@ model.compile(optimizer='adam',
 
 model.summary()
 
-model.fit(train_X, train_y, epochs=50, batch_size=record_num//10, validation_split = 0.2)
+train_X, test_X, train_y, test_y = train_test_split(train_X, train_y, test_size=0.2)
 
-test_df = pd.read_csv("data/test/test.csv")
-test_df_X = test_df[["Type", "Age", "Breed1", "Breed2", "Gender", "Color1", "Color2", "Color3", "MaturitySize", "FurLength", "Vaccinated", "Dewormed", "Sterilized", "Health", "Quantity", "Fee", "State", "PhotoAmt"]]
-# Seeing the high correlation between the 3 variables, we combine them
-if dim_red_health:
-    high_correlation_df = test_df[["Vaccinated", "Dewormed", "Sterilized"]]
-    del test_df["Vaccinated"]
-    del test_df["Dewormed"]
-    del test_df["Sterilized"]
+model.fit(train_X, train_y, epochs=100, batch_size=record_num//10, validation_split = 0.2)
 
-    test_df["Health Stats Bulk"] = pd.Series(pca.transform(high_correlation_df).reshape(1,-1)[0])
+def get_build_model(feature_num, label_feature_num):
+    def build_model(optimizer, dense_layers):
+        model = Sequential()
+        model.add(Dense(600, input_dim=feature_num, name="input_dense"))
+        for i, (layer_units, layer_actication_type) in enumerate(dense_layers):
+            model.add(Dense(layer_units, activation=layer_actication_type, name="hidden_dense_%d"%i))
+            model.add(Dropout(.2))
 
-test_X = test_df_X.values
+        model.add(Dense(label_feature_num, activation="softmax", name="output_dense"))
+        model.compile(optimizer=optimizer,
+                      loss='categorical_crossentropy',
+                      metrics=['accuracy'])
+        return model
+    return build_model
 
-test_X = ct.transform(test_X)
+classifier = KerasClassifier(build_fn= get_build_model(feature_num, label_feature_num), epochs=100)
 
-print(model.predict(test_X))
+tuned_parameters = {"optimizer": ["adam", "SGD"], "dense_layers": [[(200, "relu"), (200, "relu")], [(400, "relu")]]}
+clf = GridSearchCV(classifier, tuned_parameters, cv=5, scoring="accuracy")
+
+clf.fit(train_X, train_y)
+
+test_y_pred = model.predict(test_X)
+accuracy = np.mean(test_y_pred.ravel() == test_y.ravel())
+print("Accuracy: " + str(accuracy))
+
+test_y_pred_grid = clf_grid.predict(test_X)
+grid_accuracy = np.mean(test_y_pred_grid.ravel() == test_y.ravel())
+print("Accuracy: " + str(grid_accuracy))
+
+# return (accuracy, grid_accuracy)
