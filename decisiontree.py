@@ -83,6 +83,47 @@ def decisiontree(train_X, train_y, test_X, test_y):
 
     return (accuracy, grid_accuracy)
 
+def get_data():
+    dim_red_health = True
+
+    df = pd.read_csv("data/train/train.csv")
+    reduced_df = df[[
+    "Type", "Age", "Breed1", "Breed2",
+    "Gender", "Color1", "Color2", "Color3",
+    "MaturitySize", "FurLength", "Vaccinated",
+    "Dewormed", "Sterilized", "Health",
+    "Quantity", "Fee", "State",
+    "PhotoAmt", "AdoptionSpeed"]]
+
+
+    if dim_red_health:
+        from sklearn.decomposition import PCA
+
+        reduced_df_no_dim_red = reduced_df.copy()
+
+        high_correlation_df = reduced_df[["Vaccinated", "Dewormed", "Sterilized"]]
+        pca = PCA(n_components=1)
+        pca.fit(high_correlation_df)
+
+        # Seeing the high correlation between the 3 variables, we combine them
+        del reduced_df["Vaccinated"]
+        del reduced_df["Dewormed"]
+        del reduced_df["Sterilized"]
+
+        reduced_df["Health Stats Bulk"] = pd.Series(pca.transform(high_correlation_df).reshape(1,-1)[0])
+
+
+
+    train_X = reduced_df[["Type", "Age", "Breed1", "Breed2", "Gender", "Color1", "Color2", "Color3", "MaturitySize", "FurLength", "Health Stats Bulk", "Health", "Quantity", "Fee", "State", "PhotoAmt"]].values
+
+    ct = Encode(dim_red_health, True).get_column_transformer()
+
+    train_X = ct.fit_transform(train_X)
+
+    train_y = reduced_df[["AdoptionSpeed"]].values
+
+    return train_X, train_y
+
 if __name__ == "__main__":
     dim_red_health = True
 
@@ -133,5 +174,4 @@ if __name__ == "__main__":
     record_num = train_X.shape[0]
 
     n_classes = np.unique(train_y).shape[0]
-
     decisiontree(train_X, train_y, test_X, test_y)
