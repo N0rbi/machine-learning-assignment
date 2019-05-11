@@ -5,7 +5,7 @@ from sklearn.compose import ColumnTransformer
 from sklearn.model_selection import cross_val_score, train_test_split
 from keras.wrappers.scikit_learn import KerasClassifier
 from sklearn.model_selection import GridSearchCV
-
+from sklearn.neural_network import MLPClassifier
 
 class Encode:
 
@@ -150,9 +150,9 @@ def get_build_model(feature_num, label_feature_num):
 classifier = KerasClassifier(build_fn= get_build_model(feature_num, label_feature_num), epochs=100)
 
 tuned_parameters = {"optimizer": ["adam", "SGD"], "dense_layers": [[(200, "relu"), (200, "relu")], [(400, "relu")]]}
-clf = GridSearchCV(classifier, tuned_parameters, cv=5, scoring="accuracy")
+clf_grid = GridSearchCV(classifier, tuned_parameters, cv=5, scoring="accuracy")
 
-clf.fit(train_X, train_y)
+clf_grid.fit(train_X, train_y)
 
 test_y_pred = model.predict(test_X)
 accuracy = np.mean(test_y_pred.ravel() == test_y.ravel())
@@ -161,5 +161,6 @@ print("Accuracy: " + str(accuracy))
 test_y_pred_grid = clf_grid.predict(test_X)
 grid_accuracy = np.mean(test_y_pred_grid.ravel() == test_y.ravel())
 print("Accuracy: " + str(grid_accuracy))
+print(clf_grid.best_estimator_)
 
 # return (accuracy, grid_accuracy)

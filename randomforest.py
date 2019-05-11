@@ -8,6 +8,8 @@ from sklearn.model_selection import cross_val_score, train_test_split
 from sklearn.tree import DecisionTreeClassifier
 from sklearn.model_selection import GridSearchCV
 
+from sklearn.ensemble import RandomForestClassifier
+
 class Encode:
 
     def __init__(self, dim_red_health, use_onehots):
@@ -54,29 +56,34 @@ class Encode:
     def get_column_transformer(self):
         return ColumnTransformer(self.__transformers)
 
-def decisiontree(train_X, train_y, test_X, test_y):
-    clf = DecisionTreeClassifier(random_state=0)
-    clf.fit(train_X,train_y)
-    print("decisiontree train acc:",clf.score(train_X,train_y))
-    print("decisiontree test acc:",clf.score(test_X,test_y))
-
-    params = {
-            "criterion":["gini","entropy"],
-            'max_depth': [3, 10, 20, 50, 100],
-            'min_samples_split' : [3, 10, 20, 50, 100],
-            'max_features'      : ["auto", 3, 20],
-            "min_samples_leaf":[3, 10, 20, 50, 100],
-            "max_leaf_nodes":[3, 10, 20, 50, 100]
-    }
-    clf_grid = GridSearchCV(DecisionTreeClassifier(random_state=0), param_grid=params, cv=10)
-
-    clf_grid.fit(train_X, train_y)
-    print("decisiontree with gridsearch acc:",clf_grid.score(train_X, train_y))
-    print("decisiontree with gridsearch test acc:",clf_grid.score(test_X, test_y))
-
+def randomforest(train_X, train_y, test_X, test_y):
+    clf = RandomForestClassifier(bootstrap=True, criterion = 'gini', max_depth=80,
+                             max_features='auto', min_samples_leaf=5,
+                             min_samples_split=5, n_estimators=200)
+    clf.fit(train_X, train_y)
+    print("randomforest train acc:",clf.score(train_X,train_y))
+    print("randomforest test acc:",clf.score(test_X,test_y))
     test_y_pred = clf.predict(test_X)
     accuracy = np.mean(test_y_pred.ravel() == test_y.ravel())
     print("Accuracy: " + str(accuracy))
+
+    search_params = {
+        'n_estimators'      : [100],
+        'criterion'         : ['gini', 'entropy'],
+        'max_features'      : ["auto", 3, 20],
+        'random_state'      : [2525],
+        'n_jobs'            : [1],
+        'min_samples_split' : [3, 10, 20, 50, 100],
+        'max_depth'         : [3, 10, 20, 50, 100],
+        'bootstrap'         : [False],#True
+        'oob_score'         : [False],#True
+    }
+
+    clf_grid = GridSearchCV(RandomForestClassifier(), param_grid=search_params, cv=2, verbose=True, n_jobs=-1)
+    clf_grid.fit(train_X, train_y)
+
+    print("randomforest with gridsearchCV train acc:", clf_grid.score(train_X, train_y))
+    print("randomforest with gridsearchCV test acc:", clf_grid.score(test_X, test_y))
 
     test_y_pred_grid = clf_grid.predict(test_X)
     grid_accuracy = np.mean(test_y_pred_grid.ravel() == test_y.ravel())
@@ -84,47 +91,6 @@ def decisiontree(train_X, train_y, test_X, test_y):
     print(clf_grid.best_estimator_)
 
     return (accuracy, grid_accuracy)
-
-def get_data():
-    dim_red_health = True
-
-    df = pd.read_csv("data/train/train.csv")
-    reduced_df = df[[
-    "Type", "Age", "Breed1", "Breed2",
-    "Gender", "Color1", "Color2", "Color3",
-    "MaturitySize", "FurLength", "Vaccinated",
-    "Dewormed", "Sterilized", "Health",
-    "Quantity", "Fee", "State",
-    "PhotoAmt", "AdoptionSpeed"]]
-
-
-    if dim_red_health:
-        from sklearn.decomposition import PCA
-
-        reduced_df_no_dim_red = reduced_df.copy()
-
-        high_correlation_df = reduced_df[["Vaccinated", "Dewormed", "Sterilized"]]
-        pca = PCA(n_components=1)
-        pca.fit(high_correlation_df)
-
-        # Seeing the high correlation between the 3 variables, we combine them
-        del reduced_df["Vaccinated"]
-        del reduced_df["Dewormed"]
-        del reduced_df["Sterilized"]
-
-        reduced_df["Health Stats Bulk"] = pd.Series(pca.transform(high_correlation_df).reshape(1,-1)[0])
-
-
-
-    train_X = reduced_df[["Type", "Age", "Breed1", "Breed2", "Gender", "Color1", "Color2", "Color3", "MaturitySize", "FurLength", "Health Stats Bulk", "Health", "Quantity", "Fee", "State", "PhotoAmt"]].values
-
-    ct = Encode(dim_red_health, True).get_column_transformer()
-
-    train_X = ct.fit_transform(train_X)
-
-    train_y = reduced_df[["AdoptionSpeed"]].values
-
-    return train_X, train_y
 
 if __name__ == "__main__":
     dim_red_health = True
@@ -176,4 +142,5 @@ if __name__ == "__main__":
     record_num = train_X.shape[0]
 
     n_classes = np.unique(train_y).shape[0]
-    decisiontree(train_X, train_y, test_X, test_y)
+
+    randomforest(train_X, train_y, test_X, test_y)
