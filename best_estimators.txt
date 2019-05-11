@@ -1,0 +1,23 @@
+RandomForestClassifier(bootstrap=False, class_weight=None, criterion='gini',
+            max_depth=50, max_features=20, max_leaf_nodes=None,
+            min_impurity_decrease=0.0, min_impurity_split=None,
+            min_samples_leaf=1, min_samples_split=50,
+            min_weight_fraction_leaf=0.0, n_estimators=100, n_jobs=1,
+            oob_score=False, random_state=2525, verbose=0,
+            warm_start=False)
+
+
+DecisionTreeClassifier(class_weight=None, criterion='gini', max_depth=20,
+            max_features='auto', max_leaf_nodes=100,
+            min_impurity_decrease=0.0, min_impurity_split=None,
+            min_samples_leaf=20, min_samples_split=100,
+            min_weight_fraction_leaf=0.0, presort=False, random_state=0,
+            splitter='best')
+
+MLPClassifier(activation='relu', alpha=0.0001, batch_size=200, beta_1=0.9,
+       beta_2=0.999, early_stopping=False, epsilon=1e-08,
+       hidden_layer_sizes=(16, 3), learning_rate='constant',
+       learning_rate_init=0.001, max_iter=200, momentum=0.9,
+       n_iter_no_change=10, nesterovs_momentum=True, power_t=0.5,
+       random_state=1, shuffle=True, solver='lbfgs', tol=0.0001,
+       validation_fraction=0.1, verbose=False, warm_start=False)
