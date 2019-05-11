@@ -7,6 +7,7 @@ from sklearn.datasets import load_iris
 from sklearn.model_selection import cross_val_score, train_test_split
 from sklearn.tree import DecisionTreeClassifier
 from sklearn.model_selection import GridSearchCV
+from sklearn.metrics import f1_score
 
 class Encode:
 
@@ -77,11 +78,19 @@ def decisiontree(train_X, train_y, test_X, test_y):
     test_y_pred = clf.predict(test_X)
     accuracy = np.mean(test_y_pred.ravel() == test_y.ravel())
     print("Accuracy: " + str(accuracy))
+    score_weighted = f1_score(test_y_pred, test_y, average='weighted')
+    score_macro = f1_score(test_y_pred, test_y, average='macro')
+    print("F1 score (weighted):" + str(score_weighted))
+    print("F1 score (macro):" + str(score_macro))
 
     test_y_pred_grid = clf_grid.predict(test_X)
     grid_accuracy = np.mean(test_y_pred_grid.ravel() == test_y.ravel())
     print("Accuracy: " + str(grid_accuracy))
     print(clf_grid.best_estimator_)
+    score_weighted_grid = f1_score(test_y_pred_grid, test_y, average='weighted')
+    score_macro_grid = f1_score(test_y_pred_grid, test_y, average='macro')
+    print("F1 score (weighted):" + str(score_weighted_grid))
+    print("F1 score (macro):" + str(score_macro_grid))
 
     return (accuracy, grid_accuracy)
 

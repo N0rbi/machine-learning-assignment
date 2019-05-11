@@ -1,5 +1,8 @@
 from decisiontree import decisiontree, get_data as decision_data
 from gmm import gmm, get_data as gmm_data
+from randomforest import randomforest, get_data as randomforest_data
+from ann2 import ann, get_data as ann_data
+from knn import knn, get_data as knn_data
 import numpy as np
 import pandas as pd
 import sklearn.preprocessing as pp
@@ -52,7 +55,14 @@ class Encode:
     def get_column_transformer(self):
         return ColumnTransformer(self.__transformers)
 
-methods = [ {"model": gmm, "data": gmm_data}, {"model":decisiontree, "data": decision_data}]
+methods = [ 
+    {"model": gmm, "data": gmm_data}, 
+    {"model": decisiontree, "data": decision_data},
+    {"model": randomforest, "data": randomforest_data},
+    {"model": ann, "data": ann_data},
+    {"model": knn, "data": knn_data}
+]
+
 seeds = [1,2,3,4]
 
 outfile = open("out.csv", "w")

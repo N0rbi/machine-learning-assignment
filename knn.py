@@ -5,10 +5,8 @@ from sklearn.compose import ColumnTransformer
 
 from sklearn.datasets import load_iris
 from sklearn.model_selection import cross_val_score, train_test_split
-from sklearn.tree import DecisionTreeClassifier
+from sklearn.neighbors import KNeighborsClassifier
 from sklearn.model_selection import GridSearchCV
-
-from sklearn.neural_network import MLPClassifier
 
 class Encode:
 
@@ -56,28 +54,24 @@ class Encode:
     def get_column_transformer(self):
         return ColumnTransformer(self.__transformers)
 
-def ann(train_X, train_y, test_X, test_y):
-    clf = MLPClassifier(solver='lbfgs', alpha=1e-5, hidden_layer_sizes=(32, 3), random_state=1)
-    clf.fit(train_X, train_y)
-    print("randomforest train acc:",clf.score(train_X,train_y))
-    print("randomforest test acc:",clf.score(test_X,test_y))
+def knn(train_X, train_y, test_X, test_y):
+    clf = KNeighborsClassifier(n_neighbors=300)
+    clf.fit(train_X,train_y)
+    print("k nearest neighbour train acc:",clf.score(train_X,train_y))
+    print("k nearest neighbour test acc:",clf.score(test_X,test_y))
+
+    params = {
+        'n_neighbors' : [300, 400, 500]
+    }
+    clf_grid = GridSearchCV(KNeighborsClassifier(), param_grid=params)
+
+    clf_grid.fit(train_X, train_y)
+    print("decisiontree with gridsearch acc:",clf_grid.score(train_X, train_y))
+    print("decisiontree with gridsearch test acc:",clf_grid.score(test_X, test_y))
+
     test_y_pred = clf.predict(test_X)
     accuracy = np.mean(test_y_pred.ravel() == test_y.ravel())
     print("Accuracy: " + str(accuracy))
-
-    params = {
-        'activation' : ['relu'],
-        'solver': ['sgd', 'lbfgs', 'adam'],
-        'batch_size': [200, 300, 400],
-        'random_state': [1],
-        'hidden_layer_sizes': [(16,3), (32, 3), (64, 3)]
-    }
-
-    clf_grid = GridSearchCV(MLPClassifier(), param_grid=params)
-    clf_grid.fit(train_X, train_y)
-
-    print("randomforest with gridsearchCV train acc:", clf_grid.score(train_X, train_y))
-    print("randomforest with gridsearchCV test acc:", clf_grid.score(test_X, test_y))
 
     test_y_pred_grid = clf_grid.predict(test_X)
     grid_accuracy = np.mean(test_y_pred_grid.ravel() == test_y.ravel())
@@ -126,7 +120,6 @@ def get_data():
     train_y = reduced_df[["AdoptionSpeed"]].values
 
     return train_X, train_y
-
 
 if __name__ == "__main__":
     dim_red_health = True
@@ -178,5 +171,4 @@ if __name__ == "__main__":
     record_num = train_X.shape[0]
 
     n_classes = np.unique(train_y).shape[0]
-
-    ann(train_X, train_y, test_X, test_y)
+    knn(train_X, train_y, test_X, test_y)

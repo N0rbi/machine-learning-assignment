@@ -21,3 +21,30 @@ MLPClassifier(activation='relu', alpha=0.0001, batch_size=200, beta_1=0.9,
        n_iter_no_change=10, nesterovs_momentum=True, power_t=0.5,
        random_state=1, shuffle=True, solver='lbfgs', tol=0.0001,
        validation_fraction=0.1, verbose=False, warm_start=False)
+
+KNeighborsClassifier(algorithm='auto', leaf_size=30, metric='minkowski',
+           metric_params=None, n_jobs=None, n_neighbors=300, p=2,
+           weights='uniform')
+
+GMM: {'covariance_type': 'diag'}
+
+--------------------
+sima decision tree:
+Accuracy: 0.33144381460486827
+F1 score (weighted):0.3320914834141251
+F1 score (macro):0.2794630614318571
+
+gridsearch decision tree:
+Accuracy: 0.31077025675225073
+F1 score (weighted):0.3377197793072741
+F1 score (macro):0.22593130566736158
+
+randomforest (nincs gridsearch):
+Accuracy: 0.3887962654218073
+F1 score (weighted):0.43835018369171524
+F1 score (macro):0.2650580011004687
+
+randomforest (gridsearch):
+Accuracy: 0.3927975991997332
+F1 score (weighted):0.42492017665856086
+F1 score (macro):0.29466191437576267
