@@ -1,0 +1,1 @@
+{'wc': 5087720, 'numerical': 4152617, 'non_english': 62047, 'stopword': 428632, 'not_in_w2v': 37}

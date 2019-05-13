@@ -13,7 +13,7 @@ import matplotlib.pyplot as plt
 
 nltk.download('punkt')
 nltk.download('stopwords')
-# model = gensim.models.KeyedVectors.load_word2vec_format('w2v_tiny.txt', binary=False)
+#model = gensim.models.KeyedVectors.load_word2vec_format('w2v_tiny.txt', binary=False)
 
 model = gensim.models.KeyedVectors.load_word2vec_format('./data/embedding/GoogleNews-vectors-negative300.txt', binary=False)
 
@@ -40,8 +40,8 @@ def w2v_centroid(row):
     word_representations = []
     for word in text_non_sw:
         try:
-            word_representations.push(model[word])
-        except:
+            word_representations.append(model[word])
+        except KeyError:
             meta["not_in_w2v"] += 1
 
     if len(word_representations) == 0:
@@ -55,12 +55,12 @@ df = pd.read_csv("data/train/train.csv")
 df = df[["Description"]]
 
 # print(df.apply(w2v_centroid, axis=1))
-df =  df.head(10)
 sentence_centroids = df.apply(w2v_centroid, axis=1)
 pca = PCA(n_components=1)
 sentence_centroids_1d = pca.fit_transform(np.array([s for s in sentence_centroids]))
 
 df = pd.read_csv("data/train/train.csv")
+
 df = df[["AdoptionSpeed"]]
 df["SentenceCentroids"] = pd.Series(sentence_centroids_1d.reshape(sentence_centroids_1d.shape[0]))
 

@@ -7,7 +7,6 @@ import matplotlib.pyplot as plt
 
 train = pd.read_csv('data/train/train.csv')
 test = pd.read_csv('data/test/test.csv')
-# sub = pd.read_csv('../input/test/sample_submission.csv')
 
 train['dataset_type'] = 'train'
 test['dataset_type'] = 'test'
@@ -21,8 +20,6 @@ columns = [
 "PhotoAmt"]
 
 target = "AdoptionSpeed"
-
-fig = plt.figure()
 
 train_folded_all = pd.DataFrame()
 
@@ -43,6 +40,8 @@ categorical = ["Gender", "Vaccinated",
 
 non_categorical = ["Age", "FurLength", "Quantity", "Fee",
 "PhotoAmt"]
+
+sns.set(font_scale=2.5)
 
 for name, column, kind in (zip(["cat", "non_cat"], [categorical, non_categorical], ["count", "violin"])):
     sns.catplot(data=train_folded_all[train_folded_all["column"].isin(column)], col="column", y="value", sharey=False,
@@ -67,6 +66,6 @@ plt.savefig("train_classes_percent.png")
 
 all_data['Type'] = all_data['Type'].apply(lambda x: 'Dog' if x == 1 else 'Cat')
 plt.figure(figsize=(10, 6));
-sns.countplot(x='dataset_type', data=all_data, hue='Type');
+sns.countplot(x='dataset_type', data=all_data[all_data["dataset_type"] == "train"], hue='Type');
 plt.title('Number of cats and dogs in train and test data');
 plt.savefig("cat_dog_count.png")

@@ -88,8 +88,7 @@ def gmm(train_X, train_y, test_X, test_y):
 
     return (accuracy, grid_accuracy,)
 
-def get_data():
-    dim_red_health = False
+def get_data(dim_red_health=True):
 
     df = pd.read_csv("data/train/train.csv")
     reduced_df = df[[

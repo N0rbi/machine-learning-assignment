@@ -86,8 +86,7 @@ def ann(train_X, train_y, test_X, test_y):
 
     return (accuracy, grid_accuracy)
 
-def get_data():
-    dim_red_health = True
+def get_data(dim_red_health=True):
 
     df = pd.read_csv("data/train/train.csv")
     reduced_df = df[[
@@ -114,10 +113,10 @@ def get_data():
         del reduced_df["Sterilized"]
 
         reduced_df["Health Stats Bulk"] = pd.Series(pca.transform(high_correlation_df).reshape(1,-1)[0])
+        train_X = reduced_df[["Type", "Age", "Breed1", "Breed2", "Gender", "Color1", "Color2", "Color3", "MaturitySize", "FurLength", "Health Stats Bulk", "Health", "Quantity", "Fee", "State", "PhotoAmt"]].values
+    else:
+        train_X = reduced_df[["Type", "Age", "Breed1", "Breed2", "Gender", "Color1", "Color2", "Color3", "MaturitySize", "FurLength", "Vaccinated", "Dewormed", "Sterilized", "Health", "Quantity", "Fee", "State", "PhotoAmt"]].values
 
-
-
-    train_X = reduced_df[["Type", "Age", "Breed1", "Breed2", "Gender", "Color1", "Color2", "Color3", "MaturitySize", "FurLength", "Health Stats Bulk", "Health", "Quantity", "Fee", "State", "PhotoAmt"]].values
 
     ct = Encode(dim_red_health, True).get_column_transformer()
 
